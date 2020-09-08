@@ -40,6 +40,19 @@ let finalTimeDisplay = '0.0s';
 // Scroll
 let valueY = 0;
 
+function scoresToDOM() {
+  finalTimeDisplay = finalTime.toFixed(1);
+  baseTime = timePlayed.toFixed(1);
+  penaltyTime = penaltyTime.toFixed(1);
+
+  baseTimeEl.textContent = `Base Time: ${baseTime}s`;
+  penaltyTimeEl.textContent = `Penalty Time: +${penaltyTime}s`;
+  finalTimeEl.textContent = finalTimeDisplay;
+  scorePage.hidden = false;
+  gamePage.hidden= true;
+
+}
+
 function checkRime() {
   if(playerGussArray.length == questionAmount){
     console.log(playerGussArray);
@@ -52,6 +65,7 @@ function checkRime() {
       }
     });
     finalTime = timePlayed + penaltyTime;
+    scoresToDOM();
     console.log("timePlayed: ", timePlayed, " penaltyTime: ", penaltyTime,  " finalTime: ", finalTime)
   }
 }

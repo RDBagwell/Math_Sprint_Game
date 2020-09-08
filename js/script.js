@@ -30,14 +30,49 @@ let equationObject = {};
 const wrongFormat = [];
 
 // Time
+let timer;
+let timePlayed = 0;
+let baseTime = 0;
+let penaltyTime = 0;
+let finalTime = 0;
+let finalTimeDisplay = '0.0s';
 
 // Scroll
 let valueY = 0;
 
+function checkRime() {
+  if(playerGussArray.length == questionAmount){
+    console.log(playerGussArray);
+    clearInterval(timer);
+    equationsArray.forEach((equation, index)=>{
+      if(equation.evaluated === playerGussArray[index]){
+        // Do nothing
+      } else {
+        penaltyTime += 0.5;
+      }
+    });
+    finalTime = timePlayed + penaltyTime;
+    console.log("timePlayed: ", timePlayed, " penaltyTime: ", penaltyTime,  " finalTime: ", finalTime)
+  }
+}
+
+function addTime(){
+  timePlayed += 0.1;
+  checkRime();
+}
+
+function startTimer() {
+  timePlayed = 0;
+  penaltyTime = 0;
+  finalTime = 0;
+  timer = setInterval(addTime, 100);
+  gamePage.removeEventListener('click', startTimer)
+}
+
 function select(gussedTrue) {
   valueY += 80;
   itemContainer.scroll(0, valueY);
-  console.log(playerGussArray);
+  
   return gussedTrue ? playerGussArray.push('true') : playerGussArray.push('false');
   
 }
@@ -156,7 +191,6 @@ function getRadioValue() {
 function selectQuestionAmount(e){
   e.preventDefault();
   questionAmount = getRadioValue();
-  console.log('question amount: ', questionAmount);
   questionAmount ? showCountdown() : alert('Select a question amount');
 }
 startForm.addEventListener('click', ()=>{
@@ -169,4 +203,5 @@ startForm.addEventListener('click', ()=>{
 });
 
 
-startForm.addEventListener('submit', selectQuestionAmount)
+startForm.addEventListener('submit', selectQuestionAmount);
+gamePage.addEventListener('click', startTimer)

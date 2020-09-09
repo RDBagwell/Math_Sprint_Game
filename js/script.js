@@ -22,6 +22,7 @@ const playAgainBtn = document.querySelector('.play-again');
 let questionAmount = 0;
 let equationsArray = [];
 let playerGussArray = [];
+let bestScoreArray = [];
 
 // Game Page
 let firstNumber = 0;
@@ -35,10 +36,68 @@ let timePlayed = 0;
 let baseTime = 0;
 let penaltyTime = 0;
 let finalTime = 0;
-let finalTimeDisplay = '0.0s';
+let finalTimeDisplay = '0.0';
 
 // Scroll
 let valueY = 0;
+
+function bestScoresToDOM() {
+  bestScores.forEach((bestScore, index)=>{
+    const bestScoreEL = bestScore;
+    bestScoreEL.textContent = `${bestScoreArray[index].bestScore}`;
+  });
+}
+
+function getSaveedBestScores() {
+  if(localStorage.getItem('bestScores')){
+    bestScoreArray = JSON.parse(localStorage.bestScores);
+  } else {
+    bestScoreArray = [
+      { questions: 10, bestScore: finalTimeDisplay },
+      { questions: 25, bestScore: finalTimeDisplay },
+      { questions: 50, bestScore: finalTimeDisplay },
+      { questions: 99, bestScore: finalTimeDisplay }
+    ];
+    localStorage.setItem('bestScores', JSON.stringify(bestScoreArray));
+  }
+  bestScoresToDOM();
+}
+
+function updateBestScore() {
+  bestScoreArray.forEach((score, index) => {
+    // Select correct Best Score to update
+    if (questionAmount == score.questions) {
+      // Return Best Score as number with one decimal
+      const savedBestScore = Number(bestScoreArray[index].bestScore);
+      // Update if the new final score is less or replacing zero
+      if (savedBestScore === 0 || savedBestScore > finalTime) {
+        bestScoreArray[index].bestScore = finalTimeDisplay;
+      }
+    }
+  });
+  // Update Splash Page
+  bestScoresToDOM();
+  // Save to Local Storage
+  localStorage.setItem('bestScores', JSON.stringify(bestScoreArray));
+}
+
+function playAgain(){
+  gamePage.addEventListener('click', startTimer);
+  scorePage.hidden = true;
+  splashPage.hidden = false;
+  equationsArray = [];
+  playerGussArray = [];
+  valueY = 0;
+  playAgainBtn.hidden = true;
+}
+
+function showScorePage() {
+  setTimeout(()=>{
+    playAgainBtn.hidden = false;
+  }, 1000);
+  scorePage.hidden = false;
+  gamePage.hidden= true;
+}
 
 function scoresToDOM() {
   finalTimeDisplay = finalTime.toFixed(1);
@@ -47,10 +106,11 @@ function scoresToDOM() {
 
   baseTimeEl.textContent = `Base Time: ${baseTime}s`;
   penaltyTimeEl.textContent = `Penalty Time: +${penaltyTime}s`;
-  finalTimeEl.textContent = finalTimeDisplay;
-  scorePage.hidden = false;
-  gamePage.hidden= true;
+  finalTimeEl.textContent = `${finalTimeDisplay}s`;
+  updateBestScore();
 
+  itemContainer.scrollTo({ top: 0, behavior: 'instant'})
+  showScorePage()
 }
 
 function checkRime() {
@@ -207,6 +267,7 @@ function selectQuestionAmount(e){
   questionAmount = getRadioValue();
   questionAmount ? showCountdown() : alert('Select a question amount');
 }
+
 startForm.addEventListener('click', ()=>{
   radioContainers.forEach(radioEL=>{
     radioEL.classList.remove('selected-label');
@@ -219,3 +280,6 @@ startForm.addEventListener('click', ()=>{
 
 startForm.addEventListener('submit', selectQuestionAmount);
 gamePage.addEventListener('click', startTimer)
+
+// On Load
+getSaveedBestScores();
